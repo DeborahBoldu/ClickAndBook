@@ -9,7 +9,6 @@ load_dotenv()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
-
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key')
@@ -37,8 +36,8 @@ def create_app():
     with app.app_context():
         db.create_all()
 
-        # Crear datos iniciales solo si la base está vacía
-        if Fotografo.query.count() == 0:
+        # Crear datos iniciales solo si no hay servicios
+        if Servicio.query.count() == 0:
 
             fotografo = Fotografo(
                 nombre="Maria",
@@ -50,24 +49,23 @@ def create_app():
             db.session.add(fotografo)
             db.session.commit()
 
-            servicios = [
-                Servicio(
-                    titulo="Book de Fotos Exterior",
-                    descripcion="Sesión de 2 horas en parque con 20 fotos editadas.",
-                    precio=7500.0,
-                    duracion=2,
-                    id_fotografo=fotografo.id_fotografo
-                ),
-                Servicio(
-                    titulo="Fotografía de Producto E-commerce",
-                    descripcion="Sesión de 4 horas en estudio para catálogos digitales.",
-                    precio=15000.0,
-                    duracion=4,
-                    id_fotografo=fotografo.id_fotografo
-                )
-            ]
+            servicio1 = Servicio(
+                titulo="Book de Fotos Exterior",
+                descripcion="Sesión de 2 horas en parque con 20 fotos editadas.",
+                precio=7500.0,
+                duracion=2,
+                id_fotografo=fotografo.id_fotografo
+            )
 
-            db.session.add_all(servicios)
+            servicio2 = Servicio(
+                titulo="Fotografía de Producto E-commerce",
+                descripcion="Sesión de 4 horas en estudio para catálogos digitales.",
+                precio=15000.0,
+                duracion=4,
+                id_fotografo=fotografo.id_fotografo
+            )
+
+            db.session.add_all([servicio1, servicio2])
             db.session.commit()
 
     return app
