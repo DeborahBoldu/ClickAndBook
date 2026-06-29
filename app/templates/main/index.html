@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <title>Nuestro Catálogo</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+
+    <body>
+        <nav class="navbar navbar-dark bg-dark">
+            <div class="container">
+                <a class="navbar-brand" href="{{ url_for('main.index') }}">📷 Click & Book</a>
+                <div>
+                    {% if session.get('user_id') %}
+                        {% if not session.get('es_admin') %}
+                        <a class="btn btn-outline-light btn-sm me-2" href="{{ url_for('main.mis_reservas') }}">📅 Mis Reservas</a>
+                        {% endif %}
+                        {% if session.get('es_admin') %}
+                        <a class="btn btn-warning btn-sm me-2" href="{{ url_for('main.ver_reservas_admin') }}">📋 Ver Reservas</a>
+                        <a class="btn btn-info btn-sm me-2" href="{{ url_for('ia.predecir_precio') }}">🤖 IA</a>
+                        {% endif %}
+                        <a class="btn btn-danger btn-sm" href="{{ url_for('auth.logout') }}">Salir</a>
+                    {% else %}
+                        <a class="btn btn-primary btn-sm" href="{{ url_for('auth.login') }}">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </nav>
+        
+        <div class="container mt-4">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="d-flex justify-content-between">
+                <h2>Servicios Fotográficos</h2>
+                {% if session.get('user_id') and session.get('es_admin') %}
+                <a href="{{ url_for('main.nuevo_servicio') }}" class="btn btn-success">+ Nuevo</a>
+                {% endif %}
+                
+            </div>
+            
+            <div class="row mt-3">
+                {% for s in servicios %}
+                <div class="col-md-4 mb-3">
+                    <div class="card p-3">
+                        <h5>{{ s.titulo }}</h5>
+                        <p>{{ s.descripcion }}</p>
+                        <p>Precio: ${{ s.precio }}</p>
+                        
+                        <div class="d-flex gap-2 mt-2">
+                            {% if not session.get('es_admin') %}
+                            <a href="{{ url_for('main.reservar', id_servicio=s.id_servicio) }}" class="btn btn-primary w-100">Reservar</a>
+                            {% endif %}
+
+                            {% if session.get('user_id') and session.get('es_admin') %}
+                            <a href="{{ url_for('main.editar_servicio', id_servicio=s.id_servicio) }}" class="btn btn-warning btn-sm flex-fill">Editar</a>
+                            <form action="{{ url_for('main.eliminar_servicio', id_servicio=s.id_servicio) }}" method="POST" class="flex-fill" onsubmit="return confirm('¿Seguro que querés eliminar este servicio?');">
+                                <button class="btn btn-danger btn-sm w-100">Eliminar</button>
+                            </form>
+                            {% endif %}
+                            
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    </body>
+</html>
