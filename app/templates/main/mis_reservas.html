@@ -6,78 +6,109 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-    <nav class="navbar navbar-dark bg-dark">
-        <div class="container">
-            <a class="navbar-brand" href="{{ url_for('main.index') }}">📷 Click & Book</a>
-            <div>
-                <a class="btn btn-secondary btn-sm" href="{{ url_for('main.index') }}">Volver al Catálogo</a>
-            </div>
+
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="{{ url_for('main.index') }}">📷 Click & Book</a>
+        <div>
+            <a class="btn btn-secondary btn-sm" href="{{ url_for('main.index') }}">
+                Volver al Catálogo
+            </a>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <div class="container mt-5">
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-                        {{ message }}
-                    </div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
+<div class="container mt-5">
 
-        <h2>📅 Mis Reservas</h2>
-        <p class="text-muted">Acá podés ver el seguimiento de tus turnos fotográficos.</p>
-        
-        {% if reservas %}
-            {% for r in reservas %}
-                <div class="card mb-3 border-start border-success border-4 shadow-sm">
-                    <div class="card-body d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="card-title mb-1">{{ r.servicio.titulo }}</h5>
-                            
-                            <p class="card-text mb-1 text-secondary">
-                                <strong>Fotógrafo/a:</strong> 
-                                {% if r.servicio and r.servicio.fotografo %}
-                                    {{ r.servicio.fotografo.nombre }} {{ r.servicio.fotografo.apellido }}
-                                {% else %}
-                                    No asignado
-                                {% endif %}
-                            </p>
-                            
-                            <p class="card-text text-muted mb-1">Fecha: {{ r.fecha_reserva }} | Hora: {{ r.hora_reserva }} hs</p>
-             
-                            {% if r.estado|lower == 'pendiente' %}
-                                <span class="badge bg-info text-dark">El fotógrafo te contactará a tu mail registrado</span>
-                            {% else %}
-                                <span class="badge bg-secondary">{{ r.estado }}</span>
-                            {% endif %}
-                        </div>
-
-                        <div class="text-end">
-                            <div class="mb-2">
-                                <span class="fw-bold text-primary d-block">${{ r.servicio.precio }}</span>
-                            </div>
-                            
-                            {% if r.estado|lower == 'confirmada' %}
-                            <form action="{{ url_for('main.cancelar_reserva', id_reserva=r.id_reserva) }}" method="POST" class="d-inline">
-                                <button type="submit" 
-                                        class="btn btn-sm btn-outline-danger" 
-                                        onclick="return confirm('¿Estás seguro de que querés cancelar esta reserva? Esta acción no se puede deshacer.');">
-                                    Cancelar Reserva
-                                </button>
-                            </form>
-                            {% endif %}
-                        </div>
-                    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">
+                    {{ message }}
                 </div>
             {% endfor %}
-        {% else %}
-            
-            <div class="alert alert-info mt-4">
-                Todavía no tenés ninguna reserva. ¡Visitá nuestro catálogo!
-            </div>
         {% endif %}
-    </div>
+    {% endwith %}
+
+    <h2>📅 Mis Reservas</h2>
+    <p class="text-muted">
+        Acá podés ver el seguimiento de tus turnos fotográficos.
+    </p>
+
+    {% if reservas %}
+
+        {% for r in reservas %}
+
+        <div class="card mb-3 border-success border-4 shadow-sm">
+
+            <div class="card-body d-flex justify-content-between">
+
+                <div>
+
+                    <h4>{{ r.servicio.titulo }}</h4>
+
+                    <p>
+                        <strong>Fotógrafo:</strong>
+                        {{ r.servicio.fotografo.nombre }}
+                        {{ r.servicio.fotografo.apellido }}
+                    </p>
+
+                    <p>
+                        Fecha: {{ r.fecha_reserva }}
+                        |
+                        Hora: {{ r.hora_reserva }}
+                    </p>
+
+                    {% if r.estado == "pendiente" %}
+                        <span class="badge bg-info text-dark">
+                            El fotógrafo te contactará a tu mail registrado
+                        </span>
+                    {% else %}
+                        <span class="badge bg-success">
+                            {{ r.estado }}
+                        </span>
+                    {% endif %}
+
+                </div>
+
+                <div class="text-end">
+
+                    <h4 class="text-primary">
+                        ${{ r.servicio.precio }}
+                    </h4>
+
+                    <a class="btn btn-warning btn-sm mb-2"
+                       href="{{ url_for('main.editar_reserva', id_reserva=r.id_reserva) }}">
+                        Modificar
+                    </a>
+
+                    <form action="{{ url_for('main.cancelar_reserva', id_reserva=r.id_reserva) }}"
+                          method="POST"
+                          onsubmit="return confirm('¿Cancelar esta reserva?');">
+
+                        <button class="btn btn-danger btn-sm">
+                            Cancelar
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endfor %}
+
+    {% else %}
+
+        <div class="alert alert-info">
+            Todavía no tenés ninguna reserva.
+        </div>
+
+    {% endif %}
+
+</div>
+
 </body>
 </html>

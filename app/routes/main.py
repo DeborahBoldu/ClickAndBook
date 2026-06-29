@@ -34,6 +34,8 @@ def nuevo_servicio():
         return redirect(url_for('main.index'))
     return render_template('main/nuevo_servicio.html')
 
+
+
 @main_bp.route('/servicio/editar/<int:id_servicio>', methods=['GET', 'POST'])
 def editar_servicio(id_servicio):
     if 'user_id' not in session:
@@ -50,8 +52,10 @@ def editar_servicio(id_servicio):
         
         db.session.commit()
         return redirect(url_for('main.index'))
-
+        
     return render_template('main/editar_servicio.html', servicio=servicio)
+
+
 
 @main_bp.route('/servicio/eliminar/<int:id_servicio>', methods=['POST'])
 def eliminar_servicio(id_servicio):
@@ -59,6 +63,8 @@ def eliminar_servicio(id_servicio):
     db.session.delete(servicio)
     db.session.commit()
     return redirect(url_for('main.index'))
+
+
 
 @main_bp.route('/servicio/reservar/<int:id_servicio>', methods=['GET', 'POST'])
 def reservar(id_servicio):
@@ -88,7 +94,32 @@ def reservar(id_servicio):
         return redirect(url_for('main.mis_reservas'))
         
     return render_template('main/reservar.html', servicio=servicio, min_date=hoy)
+@main_bp.route('/editar-reserva/<int:id_reserva>', methods=['GET', 'POST'])
+def editar_reserva(id_reserva):
+    if 'user_id' not in session:
+        flash('Por favor, iniciá sesión.', 'warning')
+        return redirect(url_for('auth.login'))
 
+    reserva = Reserva.query.filter_by(
+        id_reserva=id_reserva,
+        id_cliente=session['user_id']
+    ).first_or_404()
+
+    hoy = datetime.today().strftime('%Y-%m-%d')
+
+    if request.method == 'POST':
+        reserva.fecha_reserva = request.form.get('fecha')
+        reserva.hora_reserva = request.form.get('hora')
+        db.session.commit()
+        flash('Reserva modificada correctamente.', 'success')
+        return redirect(url_for('main.mis_reservas'))
+
+    return render_template(
+        'main/reservar.html',
+        servicio=reserva.servicio,
+        reserva=reserva,
+        min_date=hoy
+    )
 @main_bp.route('/mis-reservas')
 def mis_reservas():
     if 'user_id' not in session:
