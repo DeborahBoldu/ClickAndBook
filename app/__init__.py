@@ -9,6 +9,7 @@ load_dotenv()
 db = SQLAlchemy()
 bcrypt = Bcrypt()
 
+
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = os.getenv('SECRET_KEY', 'dev_key')
@@ -16,6 +17,7 @@ def create_app():
     uri = os.getenv('DATABASE_URL', 'sqlite:///click_book.db')
     if uri.startswith("postgres://"):
         uri = uri.replace("postgres://", "postgresql://", 1)
+
     app.config['SQLALCHEMY_DATABASE_URI'] = uri
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
@@ -33,7 +35,39 @@ def create_app():
     from app.models.models import Servicio, Fotografo, Reserva
 
     with app.app_context():
-        db.create_all()        
+        db.create_all()
+
+        # Crear datos iniciales solo si la base está vacía
+        if Fotografo.query.count() == 0:
+
+            fotografo = Fotografo(
+                nombre="Maria",
+                apellido="Estudio",
+                email="maria@clickbook.com",
+                especialidad="Retrato"
+            )
+
+            db.session.add(fotografo)
+            db.session.commit()
+
+            servicios = [
+                Servicio(
+                    titulo="Book de Fotos Exterior",
+                    descripcion="Sesión de 2 horas en parque con 20 fotos editadas.",
+                    precio=7500.0,
+                    duracion=2,
+                    id_fotografo=fotografo.id_fotografo
+                ),
+                Servicio(
+                    titulo="Fotografía de Producto E-commerce",
+                    descripcion="Sesión de 4 horas en estudio para catálogos digitales.",
+                    precio=15000.0,
+                    duracion=4,
+                    id_fotografo=fotografo.id_fotografo
+                )
+            ]
+
+            db.session.add_all(servicios)
+            db.session.commit()
 
     return app
-
